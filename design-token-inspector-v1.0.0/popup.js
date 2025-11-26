@@ -2,20 +2,20 @@ let currentTokens = null;
 
 document.addEventListener('DOMContentLoaded', function() {
   extractTokens();
-  
+
   // Set up event listeners
   document.getElementById('refreshBtn').addEventListener('click', extractTokens);
   document.getElementById('exportJSON').addEventListener('click', exportAsJSON);
   document.getElementById('exportCSS').addEventListener('click', exportAsCSS);
   document.getElementById('copyTokens').addEventListener('click', copyToClipboard);
-  
+
   // Tab switching
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', function() {
       switchTab(this.dataset.tab);
     });
   });
-  
+
   // Subtab switching
   document.querySelectorAll('.subtab').forEach(subtab => {
     subtab.addEventListener('click', function() {
@@ -28,26 +28,26 @@ async function extractTokens() {
   const loading = document.getElementById('loading');
   const results = document.getElementById('results');
   const error = document.getElementById('error');
-  
+
   loading.style.display = 'block';
   results.style.display = 'none';
   error.style.display = 'none';
-  
+
   try {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     const activeTab = tabs[0];
-    
-    if (!activeTab.url || activeTab.url.startsWith('about:') || 
+
+    if (!activeTab.url || activeTab.url.startsWith('about:') ||
         activeTab.url.startsWith('chrome:') || activeTab.url.startsWith('moz-extension:')) {
       throw new Error('Cannot analyze this page');
     }
-    
+
     const response = await browser.tabs.sendMessage(activeTab.id, { action: 'extractTokens' });
     currentTokens = response;
-    
+
     loading.style.display = 'none';
     results.style.display = 'block';
-    
+
     displayTokens(response);
   } catch (err) {
     console.error('Extraction error:', err);
@@ -62,36 +62,36 @@ function displayTokens(tokens) {
   displayColors(tokens.colors.text, 'textColorsList');
   displayColors(tokens.colors.background, 'bgColorsList');
   displayColors(tokens.colors.border, 'borderColorsList');
-  
+
   // Display typography
   displayTokenList(tokens.typography.fontFamilies, 'fontFamiliesList');
   displayTokenList(tokens.typography.fontSizes, 'fontSizesList');
   displayTokenList(tokens.typography.fontWeights, 'fontWeightsList');
   displayTokenList(tokens.typography.lineHeights, 'lineHeightsList');
   displayTokenList(tokens.typography.letterSpacings, 'letterSpacingsList');
-  
+
   // Display spacing
   displayTokenList(tokens.spacing.margins, 'marginsList');
   displayTokenList(tokens.spacing.paddings, 'paddingsList');
   displayTokenList(tokens.spacing.gaps, 'gapsList');
-  
+
   // Display borders
   displayTokenList(tokens.borders.widths, 'borderWidthsList');
   displayTokenList(tokens.borders.radii, 'borderRadiiList');
   displayTokenList(tokens.borders.styles, 'borderStylesList');
-  
+
   // Display effects
   displayTokenList(tokens.shadows, 'shadowsList');
   displayTokenList(tokens.transitions, 'transitionsList');
-  
+
   // Display CSS variables
   displayCSSVariables(tokens.cssVariables);
-  
+
   // Update stats
   document.getElementById('colorCount').textContent = tokens.colors.all.length;
   document.getElementById('fontSizeCount').textContent = tokens.typography.fontSizes.length;
-  const spacingCount = tokens.spacing.margins.length + 
-                       tokens.spacing.paddings.length + 
+  const spacingCount = tokens.spacing.margins.length +
+                       tokens.spacing.paddings.length +
                        tokens.spacing.gaps.length;
   document.getElementById('spacingCount').textContent = spacingCount;
 }
@@ -99,25 +99,25 @@ function displayTokens(tokens) {
 function displayColors(colors, containerId) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
-  
+
   if (colors.length === 0) {
     container.innerHTML = '<div class="empty-state"><p>No colors found</p></div>';
     return;
   }
-  
+
   const maxCount = Math.max(...colors.map(c => c.count));
-  
+
   colors.forEach(color => {
     const colorDiv = document.createElement('div');
     colorDiv.className = 'color-token';
     colorDiv.onclick = () => copyValue(color.value);
-    
+
     colorDiv.innerHTML = `
       <div class="color-swatch" style="background-color: ${color.value}"></div>
       <div class="color-value">${color.value}</div>
       <div class="token-count">${color.count} usage${color.count !== 1 ? 's' : ''}</div>
     `;
-    
+
     container.appendChild(colorDiv);
   });
 }
@@ -125,21 +125,21 @@ function displayColors(colors, containerId) {
 function displayTokenList(tokens, containerId) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
-  
+
   if (tokens.length === 0) {
     container.innerHTML = '<div class="empty-state"><p>No tokens found</p></div>';
     return;
   }
-  
+
   const maxCount = Math.max(...tokens.map(t => t.count));
-  
+
   tokens.forEach(token => {
     const tokenDiv = document.createElement('div');
     tokenDiv.className = 'token-item';
     tokenDiv.onclick = () => copyValue(token.value);
-    
+
     const percentage = (token.count / maxCount) * 100;
-    
+
     tokenDiv.innerHTML = `
       <div class="token-value">${escapeHtml(token.value)}</div>
       <div class="token-usage">
@@ -149,7 +149,7 @@ function displayTokenList(tokens, containerId) {
         </div>
       </div>
     `;
-    
+
     container.appendChild(tokenDiv);
   });
 }
@@ -157,24 +157,24 @@ function displayTokenList(tokens, containerId) {
 function displayCSSVariables(variables) {
   const container = document.getElementById('cssVariablesList');
   container.innerHTML = '';
-  
+
   const entries = Object.entries(variables);
-  
+
   if (entries.length === 0) {
     container.innerHTML = '<div class="empty-state"><p>No CSS variables found</p></div>';
     return;
   }
-  
+
   entries.forEach(([name, value]) => {
     const varDiv = document.createElement('div');
     varDiv.className = 'variable-item';
     varDiv.onclick = () => copyValue(`var(${name})`);
-    
+
     varDiv.innerHTML = `
       <div class="variable-name">${escapeHtml(name)}</div>
       <div class="variable-value">${escapeHtml(value)}</div>
     `;
-    
+
     container.appendChild(varDiv);
   });
 }
@@ -185,7 +185,7 @@ function switchTab(tabName) {
     tab.classList.remove('active');
   });
   document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-  
+
   // Update tab panels
   document.querySelectorAll('.tab-panel').forEach(panel => {
     panel.classList.remove('active');
@@ -195,13 +195,13 @@ function switchTab(tabName) {
 
 function switchSubtab(subtabName) {
   const parent = event.target.closest('.tab-panel');
-  
+
   // Update subtab buttons within this tab
   parent.querySelectorAll('.subtab').forEach(subtab => {
     subtab.classList.remove('active');
   });
   event.target.classList.add('active');
-  
+
   // Update subtab panels within this tab
   parent.querySelectorAll('.subtab-panel').forEach(panel => {
     panel.classList.remove('active');
@@ -211,64 +211,64 @@ function switchSubtab(subtabName) {
 
 function exportAsJSON() {
   if (!currentTokens) return;
-  
+
   const dataStr = JSON.stringify(currentTokens, null, 2);
   const dataBlob = new Blob([dataStr], { type: 'application/json' });
   const url = URL.createObjectURL(dataBlob);
-  
+
   browser.downloads.download({
     url: url,
     filename: `design-tokens-${Date.now()}.json`,
     saveAs: true
   });
-  
+
   showNotification('JSON exported!');
 }
 
 function exportAsCSS() {
   if (!currentTokens) return;
-  
+
   let css = ':root {\n';
-  
+
   // Export colors
   currentTokens.colors.all.forEach((color, index) => {
     css += `  --color-${index + 1}: ${color.value};\n`;
   });
-  
+
   // Export spacing
   currentTokens.spacing.margins.forEach((margin, index) => {
     css += `  --spacing-${index + 1}: ${margin.value};\n`;
   });
-  
+
   // Export font sizes
   currentTokens.typography.fontSizes.forEach((size, index) => {
     css += `  --font-size-${index + 1}: ${size.value};\n`;
   });
-  
+
   // Export border radius
   currentTokens.borders.radii.forEach((radius, index) => {
     css += `  --radius-${index + 1}: ${radius.value};\n`;
   });
-  
+
   css += '}\n';
-  
+
   const dataBlob = new Blob([css], { type: 'text/css' });
   const url = URL.createObjectURL(dataBlob);
-  
+
   browser.downloads.download({
     url: url,
     filename: `design-tokens-${Date.now()}.css`,
     saveAs: true
   });
-  
+
   showNotification('CSS exported!');
 }
 
 function copyToClipboard() {
   if (!currentTokens) return;
-  
+
   const text = JSON.stringify(currentTokens, null, 2);
-  
+
   navigator.clipboard.writeText(text).then(() => {
     showNotification('Copied to clipboard!');
   }).catch(err => {
@@ -288,7 +288,7 @@ function showNotification(message, type = 'success') {
   notification.className = 'copied-notification';
   notification.textContent = message;
   document.body.appendChild(notification);
-  
+
   setTimeout(() => {
     notification.remove();
   }, 2000);
