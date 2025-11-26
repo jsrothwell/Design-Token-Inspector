@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Token Inspector</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎨 Design Token Inspector</h1>
+      <p class="subtitle">Extract & analyze design tokens</p>
+    </header>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Extracting design tokens...</p>
+    </div>
+
+    <div id="results" class="results" style="display: none;">
+      <div class="actions-bar">
+        <button id="exportJSON" class="btn btn-primary">📥 Export JSON</button>
+        <button id="exportCSS" class="btn btn-secondary">📥 Export CSS</button>
+        <button id="copyTokens" class="btn btn-secondary">📋 Copy</button>
+        <button id="refreshBtn" class="btn btn-icon">🔄</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="colors">Colors</button>
+        <button class="tab" data-tab="typography">Typography</button>
+        <button class="tab" data-tab="spacing">Spacing</button>
+        <button class="tab" data-tab="borders">Borders</button>
+        <button class="tab" data-tab="effects">Effects</button>
+        <button class="tab" data-tab="variables">CSS Vars</button>
+      </div>
+
+      <div class="tab-content">
+        <!-- Colors Tab -->
+        <div id="colors-tab" class="tab-panel active">
+          <div class="subtabs">
+            <button class="subtab active" data-subtab="all-colors">All</button>
+            <button class="subtab" data-subtab="text-colors">Text</button>
+            <button class="subtab" data-subtab="bg-colors">Background</button>
+            <button class="subtab" data-subtab="border-colors">Border</button>
+          </div>
+          
+          <div id="all-colors" class="subtab-panel active">
+            <div id="allColorsList" class="token-grid colors-grid"></div>
+          </div>
+          <div id="text-colors" class="subtab-panel">
+            <div id="textColorsList" class="token-grid colors-grid"></div>
+          </div>
+          <div id="bg-colors" class="subtab-panel">
+            <div id="bgColorsList" class="token-grid colors-grid"></div>
+          </div>
+          <div id="border-colors" class="subtab-panel">
+            <div id="borderColorsList" class="token-grid colors-grid"></div>
+          </div>
+        </div>
+
+        <!-- Typography Tab -->
+        <div id="typography-tab" class="tab-panel">
+          <div class="section">
+            <h3>Font Families</h3>
+            <div id="fontFamiliesList" class="token-list"></div>
+          </div>
+          <div class="section">
+            <h3>Font Sizes</h3>
+            <div id="fontSizesList" class="token-list"></div>
+          </div>
+          <div class="section">
+            <h3>Font Weights</h3>
+            <div id="fontWeightsList" class="token-list"></div>
+          </div>
+          <div class="section">
+            <h3>Line Heights</h3>
+            <div id="lineHeightsList" class="token-list"></div>
+          </div>
+          <div class="section">
+            <h3>Letter Spacing</h3>
+            <div id="letterSpacingsList" class="token-list"></div>
+          </div>
+        </div>
+
+        <!-- Spacing Tab -->
+        <div id="spacing-tab" class="tab-panel">
+          <div class="section">
+            <h3>Margins</h3>
+            <div id="marginsList" class="token-list"></div>
+          </div>
+          <div class="section">
+            <h3>Paddings</h3>
+            <div id="paddingsList" class="token-list"></div>
+          </div>
+          <div class="section">
+            <h3>Gaps</h3>
+            <div id="gapsList" class="token-list"></div>
+          </div>
+        </div>
+
+        <!-- Borders Tab -->
+        <div id="borders-tab" class="tab-panel">
+          <div class="section">
+            <h3>Border Widths</h3>
+            <div id="borderWidthsList" class="token-list"></div>
+          </div>
+          <div class="section">
+            <h3>Border Radius</h3>
+            <div id="borderRadiiList" class="token-list"></div>
+          </div>
+          <div class="section">
+            <h3>Border Styles</h3>
+            <div id="borderStylesList" class="token-list"></div>
+          </div>
+        </div>
+
+        <!-- Effects Tab -->
+        <div id="effects-tab" class="tab-panel">
+          <div class="section">
+            <h3>Shadows</h3>
+            <div id="shadowsList" class="token-list"></div>
+          </div>
+          <div class="section">
+            <h3>Transitions</h3>
+            <div id="transitionsList" class="token-list"></div>
+          </div>
+        </div>
+
+        <!-- CSS Variables Tab -->
+        <div id="variables-tab" class="tab-panel">
+          <div id="cssVariablesList" class="variables-list"></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-label">Colors:</span>
+          <span id="colorCount" class="stat-value">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Font Sizes:</span>
+          <span id="fontSizeCount" class="stat-value">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Spacing Values:</span>
+          <span id="spacingCount" class="stat-value">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="error" class="error" style="display: none;">
+      <p>⚠️ Unable to extract tokens from this page.</p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
