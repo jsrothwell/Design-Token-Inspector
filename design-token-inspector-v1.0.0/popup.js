@@ -101,7 +101,12 @@ function displayColors(colors, containerId) {
   container.innerHTML = '';
 
   if (colors.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No colors found</p></div>';
+    const emptyState = document.createElement('div');
+    emptyState.className = 'empty-state';
+    const p = document.createElement('p');
+    p.textContent = 'No colors found';
+    emptyState.appendChild(p);
+    container.appendChild(emptyState);
     return;
   }
 
@@ -112,12 +117,24 @@ function displayColors(colors, containerId) {
     colorDiv.className = 'color-token';
     colorDiv.onclick = () => copyValue(color.value);
 
-    colorDiv.innerHTML = `
-      <div class="color-swatch" style="background-color: ${color.value}"></div>
-      <div class="color-value">${color.value}</div>
-      <div class="token-count">${color.count} usage${color.count !== 1 ? 's' : ''}</div>
-    `;
+    // Create color swatch
+    const swatch = document.createElement('div');
+    swatch.className = 'color-swatch';
+    swatch.style.backgroundColor = color.value;
 
+    // Create color value
+    const valueDiv = document.createElement('div');
+    valueDiv.className = 'color-value';
+    valueDiv.textContent = color.value;
+
+    // Create count
+    const countDiv = document.createElement('div');
+    countDiv.className = 'token-count';
+    countDiv.textContent = `${color.count} usage${color.count !== 1 ? 's' : ''}`;
+
+    colorDiv.appendChild(swatch);
+    colorDiv.appendChild(valueDiv);
+    colorDiv.appendChild(countDiv);
     container.appendChild(colorDiv);
   });
 }
@@ -127,7 +144,12 @@ function displayTokenList(tokens, containerId) {
   container.innerHTML = '';
 
   if (tokens.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No tokens found</p></div>';
+    const emptyState = document.createElement('div');
+    emptyState.className = 'empty-state';
+    const p = document.createElement('p');
+    p.textContent = 'No tokens found';
+    emptyState.appendChild(p);
+    container.appendChild(emptyState);
     return;
   }
 
@@ -140,16 +162,34 @@ function displayTokenList(tokens, containerId) {
 
     const percentage = (token.count / maxCount) * 100;
 
-    tokenDiv.innerHTML = `
-      <div class="token-value">${escapeHtml(token.value)}</div>
-      <div class="token-usage">
-        <span class="usage-count">${token.count}×</span>
-        <div class="usage-bar">
-          <div class="usage-fill" style="width: ${percentage}%"></div>
-        </div>
-      </div>
-    `;
+    // Create token value
+    const valueDiv = document.createElement('div');
+    valueDiv.className = 'token-value';
+    valueDiv.textContent = token.value;
 
+    // Create usage container
+    const usageDiv = document.createElement('div');
+    usageDiv.className = 'token-usage';
+
+    // Create usage count
+    const countSpan = document.createElement('span');
+    countSpan.className = 'usage-count';
+    countSpan.textContent = `${token.count}×`;
+
+    // Create usage bar
+    const barDiv = document.createElement('div');
+    barDiv.className = 'usage-bar';
+
+    const fillDiv = document.createElement('div');
+    fillDiv.className = 'usage-fill';
+    fillDiv.style.width = `${percentage}%`;
+
+    barDiv.appendChild(fillDiv);
+    usageDiv.appendChild(countSpan);
+    usageDiv.appendChild(barDiv);
+
+    tokenDiv.appendChild(valueDiv);
+    tokenDiv.appendChild(usageDiv);
     container.appendChild(tokenDiv);
   });
 }
@@ -161,7 +201,12 @@ function displayCSSVariables(variables) {
   const entries = Object.entries(variables);
 
   if (entries.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No CSS variables found</p></div>';
+    const emptyState = document.createElement('div');
+    emptyState.className = 'empty-state';
+    const p = document.createElement('p');
+    p.textContent = 'No CSS variables found';
+    emptyState.appendChild(p);
+    container.appendChild(emptyState);
     return;
   }
 
@@ -170,11 +215,18 @@ function displayCSSVariables(variables) {
     varDiv.className = 'variable-item';
     varDiv.onclick = () => copyValue(`var(${name})`);
 
-    varDiv.innerHTML = `
-      <div class="variable-name">${escapeHtml(name)}</div>
-      <div class="variable-value">${escapeHtml(value)}</div>
-    `;
+    // Create variable name
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'variable-name';
+    nameDiv.textContent = name;
 
+    // Create variable value
+    const valueDiv = document.createElement('div');
+    valueDiv.className = 'variable-value';
+    valueDiv.textContent = value;
+
+    varDiv.appendChild(nameDiv);
+    varDiv.appendChild(valueDiv);
     container.appendChild(varDiv);
   });
 }
